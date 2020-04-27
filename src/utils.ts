@@ -1,4 +1,4 @@
-import type { RetryError } from "./types";
+import type { RetryError } from './types';
 
 type SuccessReturn<T> = [T, false];
 type FailureReturn = [any, true];
@@ -25,7 +25,7 @@ function* tryCatchYield<T, TNext>(value: T): Generator<T, TryCatchYieldReturn<TN
  */
 export function* runGenerator<T, TReturn, TNext>(
   generator: Generator<T, TReturn, TNext>,
-  stopCondition: (v: T) => boolean,
+  stopCondition: (v: unknown) => boolean,
 ): Generator<T, TReturn, TNext> {
   let yielded = generator.next();
 

@@ -13,10 +13,10 @@ module.exports = {
   moduleDirectories: ['node_modules', 'src', './'],
   preset: 'ts-jest',
   testRegex: 'test/.*?\\.(test|spec)\\.ts$',
-  setupFilesAfterEnv: ['./test/setup.ts'],
-  globals: {
-    'ts-jest': {
-      tsConfig: './tsconfig.spec.json',
-    },
-  },
+  // setupFilesAfterEnv: ['./test/setup.ts'],
+  // globals: {
+  //   'ts-jest': {
+  //     tsConfig: './tsconfig.spec.json',
+  //   },
+  // },
 };

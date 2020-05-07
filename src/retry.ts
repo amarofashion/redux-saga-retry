@@ -1,13 +1,7 @@
-/* eslint-disable consistent-return */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { delay } from 'redux-saga/effects';
-// import type { SagaIterator, Saga } from 'redux-saga';
 import { runGenerator } from './utils';
 import { exponentialGrowth } from './backoff-functions';
-
-// type GenFun<T, TReturn, TNext, TArgs extends Array<unknown> = any[]> = (
-//   ...args: TArgs
-// ) => Generator<T, TReturn, TNext>;
+import type { GeneratorFactory } from './types';
 
 interface RetryGeneratorOptions {
   backoff?: (attempt: number) => number;
@@ -15,15 +9,13 @@ interface RetryGeneratorOptions {
   stopCondition: (v: unknown) => boolean;
 }
 
-// type TempGenerator<Args extends any[] = any[]> = Saga<Args>;
-type TempGenerator<Args extends any[] = any[]> = (...args: Args) => any;
-
 export function retry<Args extends any[] = any[]>(
-  gen: TempGenerator,
+  gen: GeneratorFactory<Args>,
   options: RetryGeneratorOptions,
-): TempGenerator {
+): GeneratorFactory<Args> {
   const { backoff = exponentialGrowth, defaultMax = 3, stopCondition } = options;
 
+  /* eslint-disable-next-line consistent-return */
   function* retryableGenerator(...args: Args) {
     const [action] = args;
     const maxRetries = action?.meta?.retries || defaultMax;
@@ -45,5 +37,5 @@ export function retry<Args extends any[] = any[]>(
 
   Object.defineProperty(retryableGenerator, 'name', { value: `retryGenerator(${gen.name})` });
 
-  return retryableGenerator as TempGenerator;
+  return retryableGenerator as GeneratorFactory<Args>;
 }

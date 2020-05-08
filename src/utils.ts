@@ -1,4 +1,4 @@
-import type { RetryError } from './types';
+import type { RetryError, ConditionFunction } from './types';
 
 type SuccessReturn<T> = [T, false];
 type FailureReturn = [any, true];
@@ -25,7 +25,7 @@ function* tryCatchYield<T, TNext>(value: T): Generator<T, TryCatchYieldReturn<TN
  */
 export function* runGenerator<T, TReturn, TNext>(
   generator: Generator<T, TReturn, TNext>,
-  stopCondition: (v: unknown) => boolean,
+  stopCondition: ConditionFunction,
 ): Generator<T, TReturn, TNext> {
   let yielded = generator.next();
 
@@ -50,3 +50,11 @@ export function* runGenerator<T, TReturn, TNext>(
 
   return yielded.value;
 }
+
+export function actionTypeMatches(regex: RegExp): ConditionFunction {
+  return function matches(value: any) {
+    return value?.type === 'PUT' && regex.test(value.payload?.action?.type);
+  };
+}
+
+export const alwaysFalse: ConditionFunction = () => false;

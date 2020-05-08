@@ -44,8 +44,6 @@ function stopConditionValidator(value: any) {
   return type.endsWith('_FAILURE') && ![401, 404, 500].includes(payload.status);
 }
 
-const defaultOptions = { stopCondition: stopConditionValidator };
-
 describe('retry', () => {
   const action = { payload: { key: 'value' }, type: 'DUMMY_REQUEST' };
   const expectedArgs = [
@@ -61,7 +59,7 @@ describe('retry', () => {
 
   describe('on success cases', () => {
     it('should not change flow', async () => {
-      const retryableGenerator = retry(originalGenerator, defaultOptions);
+      const retryableGenerator = retry(originalGenerator);
 
       const originalResult = await expectSaga(originalGenerator, action).run();
       const retryableResult = await expectSaga(retryableGenerator, action).run();
@@ -70,7 +68,7 @@ describe('retry', () => {
     });
 
     it('should execute once and dispatch success action', async () => {
-      const retryableGenerator = retry(originalGenerator, defaultOptions);
+      const retryableGenerator = retry(originalGenerator);
 
       const result = await expectSaga(retryableGenerator, action).run();
 
@@ -85,7 +83,7 @@ describe('retry', () => {
   describe('on error cases', () => {
     it('should dispatch only 1 error and alert actions', async () => {
       dummyClient.mockRejectedValue('Rejected');
-      const retryableGenerator = retry(originalGenerator, defaultOptions);
+      const retryableGenerator = retry(originalGenerator);
 
       const result = await expectSaga(retryableGenerator, action).run();
 
@@ -97,7 +95,7 @@ describe('retry', () => {
     it('should retry N times', async () => {
       dummyClient.mockRejectedValue('Rejected');
       const n = 4;
-      const retryableGenerator = retry(originalGenerator, { ...defaultOptions, defaultMax: n });
+      const retryableGenerator = retry(originalGenerator, { defaultMax: n });
 
       const result = await expectSaga(retryableGenerator, action).run();
 
@@ -107,9 +105,9 @@ describe('retry', () => {
       expect(result.effects.call).toHaveLength(2 * n + 1); // call(dummyClient) n+1 times + call(delay) n times
     });
 
-    it.each([401, 404, 500])('should not retry on HTTP status %d', async status => {
-      dummyClient.mockRejectedValue({ message: 'Rejected', status });
-      const retryableGenerator = retry(originalGenerator, defaultOptions);
+    it('should use custom condition function', async () => {
+      dummyClient.mockRejectedValue({ message: 'Rejected', status: 401 });
+      const retryableGenerator = retry(originalGenerator, { condition: stopConditionValidator });
 
       const result = await expectSaga(retryableGenerator, action).run();
 
@@ -118,7 +116,7 @@ describe('retry', () => {
     });
 
     it('should not handle thrown exceptions', async () => {
-      const retryableGenerator = retry(brokenSaga, defaultOptions);
+      const retryableGenerator = retry(brokenSaga);
 
       let result: any;
       let error: any;

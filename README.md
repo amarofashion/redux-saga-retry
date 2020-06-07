@@ -89,9 +89,9 @@ As a `RegExp`, we listen for redux-saga's `yield put(action)` calls and check if
 As a `function`, you are free to inspect every yielded value and decide if we should start over the execution of that saga.
 
 
-#### defaultMax: `number`
+#### retries: `number`
 
-The maximum number of **retries**, so the saga will run at most (1 + defaultMax) times.
+The maximum number of retries the saga will run. Doesn't include the original run.
 
 _Default: `3`_
 
@@ -130,8 +130,8 @@ import { retry, linearGrowth } from 'redux-saga-retry';
 
 retry(getCoffee, {
   condition: /_FAIL(ED|URE)?$/,
-  defaultMax: 4,
   backoff: linearGrowth,
+  retries: 4,
 })
 ```
 

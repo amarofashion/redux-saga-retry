@@ -106,7 +106,7 @@ describe('retry', () => {
     it('should retry N times', async () => {
       dummyClient.mockRejectedValue('Rejected');
       const n = 4;
-      const retryableGenerator = retry(originalGenerator, { defaultMax: n });
+      const retryableGenerator = retry(originalGenerator, { retries: n });
 
       const result = await expectSaga(retryableGenerator, action).run();
 

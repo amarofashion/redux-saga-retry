@@ -66,12 +66,14 @@
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-prettier": "^3.1.3",
+    "husky": "^4.2.5",
     "jest": "^25.4.0",
     "jest-generator": "^1.0.7",
     "prettier": "^2.0.5",
     "redux": "^4.0.5",
     "redux-saga": "^1.1.3",
     "redux-saga-test-plan": "^4.0.0-rc.3",
+    "repo-tools": "^0.2.0",
     "rimraf": "^3.0.2",
     "size-limit": "^4.4.5",
     "ts-jest": "^25.4.0",
@@ -93,5 +95,11 @@
       "path": "./esm/index.js",
       "limit": "2 kB"
     }
-  ]
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "repo-tools check-remote",
+      "post-merge": "repo-tools install-packages"
+    }
+  }
 }

@@ -1,7 +1,7 @@
 import type { AnyAction } from 'redux';
 import { call, put } from 'redux-saga/effects';
 import { expectSaga } from 'redux-saga-test-plan';
-import { retry } from '../src/retry';
+import { linearGrowth, retry } from '../src';
 
 jest.mock('../src/backoff', () => ({
   exponentialGrowth: () => 0,
@@ -54,6 +54,8 @@ describe('retry', () => {
   afterEach(() => {
     // @ts-ignore
     global.console.error.mockRestore();
+    dummyClient.mockReset();
+    dummyClient.mockResolvedValue('Resolved');
   });
 
   const action = { payload: { key: 'value' }, type: 'DUMMY_REQUEST' };
@@ -62,11 +64,6 @@ describe('retry', () => {
     expect.objectContaining({ payload: action.payload }),
   ];
   const originalGenerator = dummySaga;
-
-  afterEach(() => {
-    dummyClient.mockReset();
-    dummyClient.mockResolvedValue('Resolved');
-  });
 
   describe('on success cases', () => {
     it('should not change flow', async () => {
@@ -106,7 +103,7 @@ describe('retry', () => {
     it('should retry N times', async () => {
       dummyClient.mockRejectedValue('Rejected');
       const n = 4;
-      const retryableGenerator = retry(originalGenerator, { retries: n });
+      const retryableGenerator = retry(originalGenerator, { backoff: linearGrowth, retries: n });
 
       const result = await expectSaga(retryableGenerator, action).run();
 

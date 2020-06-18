@@ -1,0 +1,12 @@
+{
+  "extends": ["plugin:jest/recommended", "plugin:jest/style"],
+  "plugins": [
+    "jest"
+  ],
+  "rules": {
+    "no-console": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
+    "jest/valid-describe": "error",
+    "jest/valid-expect-in-promise": "error"
+  }
+}

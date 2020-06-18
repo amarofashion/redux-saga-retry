@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`retry on error cases should retry N times 1`] = `
+exports[`retry on error cases should retry 4 times 1`] = `
 Object {
   "call": Array [
     Object {
@@ -173,7 +173,180 @@ Object {
 }
 `;
 
-exports[`retry on error cases should use custom condition function 1`] = `
+exports[`retry on error cases should retry 4 times using the meta from the action 1`] = `
+Object {
+  "call": Array [
+    Object {
+      "@@redux-saga/IO": true,
+      "combinator": false,
+      "payload": Object {
+        "args": Array [
+          "https://example.com",
+          Object {
+            "payload": Object {
+              "key": "value",
+            },
+          },
+        ],
+        "context": null,
+        "fn": "@@redux-saga-test-plan/json/function/mockConstructor",
+      },
+      "type": "CALL",
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "combinator": false,
+      "payload": Object {
+        "args": Array [
+          0,
+        ],
+        "context": null,
+        "fn": "@@redux-saga-test-plan/json/function/delayP",
+      },
+      "type": "CALL",
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "combinator": false,
+      "payload": Object {
+        "args": Array [
+          "https://example.com",
+          Object {
+            "payload": Object {
+              "key": "value",
+            },
+          },
+        ],
+        "context": null,
+        "fn": "@@redux-saga-test-plan/json/function/mockConstructor",
+      },
+      "type": "CALL",
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "combinator": false,
+      "payload": Object {
+        "args": Array [
+          0,
+        ],
+        "context": null,
+        "fn": "@@redux-saga-test-plan/json/function/delayP",
+      },
+      "type": "CALL",
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "combinator": false,
+      "payload": Object {
+        "args": Array [
+          "https://example.com",
+          Object {
+            "payload": Object {
+              "key": "value",
+            },
+          },
+        ],
+        "context": null,
+        "fn": "@@redux-saga-test-plan/json/function/mockConstructor",
+      },
+      "type": "CALL",
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "combinator": false,
+      "payload": Object {
+        "args": Array [
+          0,
+        ],
+        "context": null,
+        "fn": "@@redux-saga-test-plan/json/function/delayP",
+      },
+      "type": "CALL",
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "combinator": false,
+      "payload": Object {
+        "args": Array [
+          "https://example.com",
+          Object {
+            "payload": Object {
+              "key": "value",
+            },
+          },
+        ],
+        "context": null,
+        "fn": "@@redux-saga-test-plan/json/function/mockConstructor",
+      },
+      "type": "CALL",
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "combinator": false,
+      "payload": Object {
+        "args": Array [
+          0,
+        ],
+        "context": null,
+        "fn": "@@redux-saga-test-plan/json/function/delayP",
+      },
+      "type": "CALL",
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "combinator": false,
+      "payload": Object {
+        "args": Array [
+          "https://example.com",
+          Object {
+            "payload": Object {
+              "key": "value",
+            },
+          },
+        ],
+        "context": null,
+        "fn": "@@redux-saga-test-plan/json/function/mockConstructor",
+      },
+      "type": "CALL",
+    },
+  ],
+  "put": Array [
+    Object {
+      "@@redux-saga/IO": true,
+      "combinator": false,
+      "payload": Object {
+        "action": Object {
+          "payload": Object {
+            "message": undefined,
+            "status": undefined,
+          },
+          "type": "DUMMY_FAILURE",
+        },
+        "channel": undefined,
+      },
+      "type": "PUT",
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "combinator": false,
+      "payload": Object {
+        "action": Object {
+          "payload": Object {
+            "message": undefined,
+            "status": undefined,
+            "type": "error",
+          },
+          "type": "DUMMY_SHOW_ALERT",
+        },
+        "channel": undefined,
+      },
+      "type": "PUT",
+    },
+  ],
+}
+`;
+
+exports[`retry on error cases should work with custom conditions 1`] = `
 Object {
   "call": Array [
     Object {
@@ -230,7 +403,7 @@ Object {
 }
 `;
 
-exports[`retry on success cases should execute once and dispatch success action 1`] = `
+exports[`retry on success cases should execute once and dispatch the success action 1`] = `
 Object {
   "call": Array [
     Object {

@@ -75,7 +75,7 @@ describe('retry', () => {
       expect(originalResult.toJSON()).toEqual(retryableResult.toJSON());
     });
 
-    it('should execute once and dispatch success action', async () => {
+    it('should execute once and dispatch the success action', async () => {
       const retryableGenerator = retry(originalGenerator);
 
       const result = await expectSaga(retryableGenerator, action).run();
@@ -89,7 +89,7 @@ describe('retry', () => {
   });
 
   describe('on error cases', () => {
-    it('should dispatch only 1 error and alert actions', async () => {
+    it('should retry 3 times (default) and dispatch the actions', async () => {
       dummyClient.mockRejectedValue('Rejected');
       const retryableGenerator = retry(originalGenerator);
 
@@ -100,20 +100,33 @@ describe('retry', () => {
       expect(result.effects.put[1].payload.action.type).toMatch(/^DUMMY_SHOW_ALERT$/g);
     });
 
-    it('should retry N times', async () => {
+    it('should retry 4 times', async () => {
       dummyClient.mockRejectedValue('Rejected');
-      const n = 4;
-      const retryableGenerator = retry(originalGenerator, { backoff: linearGrowth, retries: n });
+      const retries = 4;
+      const retryableGenerator = retry(originalGenerator, { backoff: linearGrowth, retries });
 
       const result = await expectSaga(retryableGenerator, action).run();
 
       expect(result.toJSON()).toMatchSnapshot();
-      expect(dummyClient).toHaveBeenCalledTimes(1 + n); // original call + n retries
-      expect(dummyClient.mock.calls).toEqual(Array(1 + n).fill(expectedArgs));
-      expect(result.effects.call).toHaveLength(2 * n + 1); // call(dummyClient) n+1 times + call(delay) n times
+      expect(dummyClient).toHaveBeenCalledTimes(1 + retries); // original call + n retries
+      expect(dummyClient.mock.calls).toEqual(Array(1 + retries).fill(expectedArgs));
+      expect(result.effects.call).toHaveLength(2 * retries + 1); // call(dummyClient) n+1 times + call(delay) n times
     });
 
-    it('should use custom condition function', async () => {
+    it('should retry 4 times using the meta from the action', async () => {
+      dummyClient.mockRejectedValue('Rejected');
+      const retryableGenerator = retry(originalGenerator);
+
+      const result = await expectSaga(retryableGenerator, {
+        ...action,
+        meta: { retries: 4 },
+      }).run();
+
+      expect(result.toJSON()).toMatchSnapshot();
+      expect(dummyClient).toHaveBeenCalledTimes(5);
+    });
+
+    it('should work with custom conditions', async () => {
       dummyClient.mockRejectedValue({ message: 'Rejected', status: 401 });
       const retryableGenerator = retry(originalGenerator, { condition: stopConditionValidator });
 
@@ -123,7 +136,7 @@ describe('retry', () => {
       expect(result.toJSON()).toMatchSnapshot();
     });
 
-    it('should not handle thrown exceptions', async () => {
+    it('should not handle exceptions', async () => {
       const retryableGenerator = retry(brokenSaga);
 
       let result: any;
@@ -137,6 +150,24 @@ describe('retry', () => {
 
       expect(result).toBeUndefined();
       expect(error).toBeInstanceOf(TypeError);
+    });
+  });
+
+  describe('with debug', () => {
+    it('should dispatch actions when the debug option is on', async () => {
+      dummyClient.mockRejectedValue('Rejected');
+      const retryableGenerator = retry(originalGenerator, { debug: true });
+
+      const result = await expectSaga(retryableGenerator, action).run();
+
+      expect(result.effects.put).toHaveLength(5);
+
+      result.effects.put
+        .filter(d => d.payload.action.type === '@@REDUX-SAGA-RETRY')
+        .forEach((d, i) => {
+          const { payload } = d.payload.action;
+          expect(payload.attempt).toBe(i + 1);
+        });
     });
   });
 });

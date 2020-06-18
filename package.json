@@ -39,7 +39,8 @@
     "build": "npm run clean && npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc",
     "build:esm": "tsc -m es6 --outDir esm",
-    "watch": "npm run build:esm && npm run build:cjs -- -w",
+    "watch:cjs": "npm run build:cjs -- -w",
+    "watch:esm": "npm run build:esm -- -w",
     "clean": "rimraf lib && rimraf esm",
     "lint": "eslint --ext .ts src test",
     "test": "jest",
@@ -56,18 +57,19 @@
     "redux-saga": ">=1.0.0"
   },
   "devDependencies": {
-    "@size-limit/preset-small-lib": "^4.4.5",
-    "@types/jest": "^25.2.1",
-    "@types/node": "^13.13.2",
-    "@typescript-eslint/eslint-plugin": "^2.29.0",
-    "@typescript-eslint/parser": "^2.29.0",
+    "@size-limit/preset-small-lib": "^4.5.0",
+    "@types/jest": "^26.0.0",
+    "@types/node": "^14.0.13",
+    "@typescript-eslint/eslint-plugin": "^3.3.0",
+    "@typescript-eslint/parser": "^3.3.0",
     "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-prettier": "^3.1.3",
+    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-jest": "^23.13.2",
+    "eslint-plugin-prettier": "^3.1.4",
     "husky": "^4.2.5",
-    "jest": "^25.4.0",
+    "jest": "^26.0.1",
     "jest-generator": "^1.0.7",
     "prettier": "^2.0.5",
     "redux": "^4.0.5",
@@ -75,9 +77,9 @@
     "redux-saga-test-plan": "^4.0.0-rc.3",
     "repo-tools": "^0.2.0",
     "rimraf": "^3.0.2",
-    "size-limit": "^4.4.5",
-    "ts-jest": "^25.4.0",
-    "typescript": "^3.8.3"
+    "size-limit": "^4.5.0",
+    "ts-jest": "^26.1.0",
+    "typescript": "^3.9.5"
   },
   "prettier": {
     "trailingComma": "all",
@@ -98,7 +100,7 @@
   ],
   "husky": {
     "hooks": {
-      "pre-commit": "repo-tools check-remote",
+      "pre-commit": "repo-tools check-remote && npm run validate",
       "post-merge": "repo-tools install-packages"
     }
   }

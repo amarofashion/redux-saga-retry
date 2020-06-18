@@ -1,8 +1,9 @@
 # redux-saga-retry
 
-Quickly add a retry behavior to your saga!
+[![NPM Package](https://badge.fury.io/js/redux-saga-retry.svg)](https://www.npmjs.com/package/redux-saga-retry) [![Build Status](https://travis-ci.com/amarofashion/redux-saga-retry.svg?branch=master)](https://travis-ci.com/amarofashion/redux-saga-retry) [![Maintainability](https://api.codeclimate.com/v1/badges/c9742c793415a6dc603c/maintainability)](https://codeclimate.com/github/amarofashion/redux-saga-retry/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/c9742c793415a6dc603c/test_coverage)](https://codeclimate.com/github/amarofashion/redux-saga-retry/test_coverage)
 
-Just wrap it:
+Retry failed async sagas automatically!
+
 ```js
 // before
 takeLatest('GET_COFFEE', getCoffee)
@@ -11,26 +12,21 @@ takeLatest('GET_COFFEE', getCoffee)
 takeLatest('GET_COFFEE', retry(getCoffee))
 ```
 
-and we will stop your saga and start it over as soon as it dispatches a failure action.
+Just wrap your saga with the retry machine and It will run it again when a failure action happens.
 
+## Highlights
 
-## Features
+- 🏖 **Easy to use:** Simply wrap your saga
+- 🔼 **Incremental adoption:** Just add to the sagas that need it
+- 🛠 **Flexible and granular:** Personalize the options to fit your needs
+- 🟦 **Typescript ready:** Nicely typed (but accepting improvements too)
 
-- 🏖 **Easy to use:** Simply wrap your saga;
-- 🔼 **Incremental adoption:** Just to the sagas that need it;
-- 🛠 **Flexible and granular:** Personalize the options to fit your needs for each saga, or just embrace the defaults;
-- 🟦 **Typescript ready:** Nicely typed (but accepting improvements too);
-
+**Demo:** https://utd8b.csb.app/
 
 ## Install
+
 ```sh
 $ npm install redux-saga-retry
-```
-
-or
-
-```sh
-$ yarn add redux-saga-retry
 ```
 
 
@@ -49,55 +45,66 @@ export default function* root() {
 }
 ```
 
-As soon as your saga yields an action with the type ending with `_FAILURE` we stop that execution and start it over:
+If your saga yields an action with the type ending with `_FAILURE` the machine will hold it and run the saga again.
 
 ```js
 function* getCoffee(action) {
-  ...
-  if (!success) {
-    // stops the execution here
-    yield put({ type: 'GET_COFFEE_FAILURE' });
-  }
+  try {
+    yield call(...);
 
-  // executed only on success, or on the last try
-  yield put({ type: 'EXIT_KITCHEN' });
+    yield put({ type: 'GET_COFFEE_SUCCESS' });
+  } catch (error) {
+    // This will trigger the retry machine
+		yield put({ type: 'GET_COFFEE_FAILURE' });
+  }
 }
 ```
 
-Please note that the last try will not stop the execution, and your saga will run as usual: until its end.
+After the request resolves successfully or the retries are exhausted your saga will run through the end.
 
 
 ## API
 
 ## `retry(saga, [options])`
 
-Wraps `saga` (a saga function) and returns a retryable version of that saga.
+Wraps a saga function and returns a retryable version of it.
 
-The `options` argument is an object, so you can tune how the retry should work.
+The `options` argument is an object that you can tune how the retry works.
 
 
-### Options description
+### Options
 
-#### condition: `RegExp | (v: any) => boolean`
+**backoff** `(attempt: number) => number` ▶ `exponentialGrowth`
 
+A function to sparse the retries, where `attempt` is the number of the current attempt (starting on `0`) and returns how long to wait before trying again, in milliseconds.
+
+We provide some basic functions (`linearGrowth` and `exponentialGrowth`) but you are free to implement your own.
+
+**condition:** `RegExp | (v: any) => boolean` ▶ `/_FAILURE$/`
 The condition to tell if the retry should happen.
 
-_Default: `/_FAILURE$/`_
+As a `RegExp`, it will listen for redux-saga's action that matches the regex.  
+As a `function`, you are responsible to decide if it should retry the execution.
 
-As a `RegExp`, we listen for redux-saga's `yield put(action)` calls and check if the `action.type` matches the provided regex.
+**debug:** `boolean` ▶ `false`
 
-As a `function`, you are free to inspect every yielded value and decide if we should start over the execution of that saga.
+Dispatch an action when the retry happens.
 
+```js
+{
+  type: '@@REDUX-SAGA-RETRY',
+  payload: {
+  	action: 'NOTES_REQUEST',
+  	attempt: 1,
+  },
+}
+```
 
-#### retries: `number`
+**retries:** `number` ▶ `3`
 
-The maximum number of retries the saga will run. Doesn't include the original run.
-
-_Default: `3`_
-
-It accepts `Infinity` as value.
-
+The maximum number of retries the saga will run. Doesn't include the original run.  
 You can override this value for each run by setting a `meta.retries` on the action that you dispatch to the store:
+
 ```js
 dispatch({
   type: 'GET_COFFEE',
@@ -105,19 +112,9 @@ dispatch({
 });
 ```
 
+## Examples
 
-#### backoff: `(attempt: number) => number`
-
-A function to sparse the retries, where `attempt` is the number of the current attempt (starting on `0`) and returns how long to wait before trying again, in milliseconds.
-
-We provide some basic backoff functions but you are free to implement your own.
-
-_Default: `exponentialGrowth`_
-
-
-## Detailed Usage
-
-### Example 1
+**Custom options**
 
 - matches any action ending on `_FAIL`, `_FAILED` or `_FAILURE`
 - retry up to 4 times
@@ -135,12 +132,10 @@ retry(getCoffee, {
 })
 ```
 
-
-### Example 2
+**Advanced condition and backoff options**
 
 - custom condition: checks for `PUT` effects in which the action type ends on `_FAILURE` but not if the `payload.status` is `401` (maybe you want to handle the authorization before try again).
-- retry up to 3 times (default)
-- sparse the tries by 1400, 400ms, 800ms, 1200ms...
+- sparse the tries by an initial delay of 1400ms followed by 400ms, 800ms, 1200ms...
 
 ```js
 import { retry } from 'redux-saga-retry';
@@ -164,3 +159,7 @@ retry(getCoffee, {
   backoff: backoffFn,
 })
 ```
+
+## License
+
+MIT
